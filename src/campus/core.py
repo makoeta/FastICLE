@@ -20,6 +20,7 @@ from fasticrl.icrl_learner import ICRLLearner
 
 from loguru import logger
 
+
 class Campus(BaseModel):
 
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
@@ -35,14 +36,14 @@ class Campus(BaseModel):
     def get_expert_descriptions(self) -> list[tuple[str, str]]:
         for yaml_file in Path(self.save_path).glob("*.yaml"):
             pass
-        
+
     def __generate_synth_learning_tasks(self, expert_task):
         task_agent = Agent(
-                    model=self.model,
-                    output_schema=TrainingTaskList,
-                    system_message=campus_agent_system_prompt
-                )
-        
+            model=self.model,
+            output_schema=TrainingTaskList,
+            system_message=campus_agent_system_prompt,
+        )
+
         run_output: RunOutput = task_agent.run(f"""Global task: {self.global_task}
 
                     Expert task: {expert_task}""")
@@ -50,54 +51,52 @@ class Campus(BaseModel):
         task_list: TrainingTaskList = TrainingTaskList.model_validate(
             run_output.content
         )
-        
+
         return task_list
 
     def train_new_expert(self, expert_name: str, expert_task: str) -> None:
 
+        expert_name = expert_name.replace(" ", "_").lower()
+
         logger.debug(f"Creating synthetic tasks for '{expert_task}'...")
         task_list: TrainingTaskList = self.__generate_synth_learning_tasks(expert_task)
         logger.debug(f"...created {len(task_list.tasks)} tasks.")
-        
+
         def reward_func(model_output: str, task: str) -> int:
             reward_agent = Agent(
                 model=self.model,
-                system_message=reward_agent_system_prompt.format(expert_task=expert_task, global_task=self.global_task),
-                output_schema=RewardOutput
+                system_message=reward_agent_system_prompt.format(
+                    expert_task=expert_task, global_task=self.global_task
+                ),
+                output_schema=RewardOutput,
             )
-            
-            output: RunOutput = reward_agent.run(f"Task given: {task}\nOutput: {model_output}")
-            
+
+            output: RunOutput = reward_agent.run(
+                f"Task given: {task}\nOutput: {model_output}"
+            )
+
             reward_output: RewardOutput = RewardOutput.model_validate(output.content)
             return reward_output.reward
-        
+
         learner = ICRLLearner(
             agent=Agent(model=self.model),
             reward_func=reward_func,
-            task_description=icrl_agent_system_prompt.format(global_task=self.global_task, expert_task=expert_task),
-            tasks=task_list.tasks
+            task_description=icrl_agent_system_prompt.format(
+                global_task=self.global_task, expert_task=expert_task
+            ),
+            tasks=task_list.tasks,
         )
-        
+
         logger.debug(f"Start training")
         learner.auto_learn()
         learner.update_strategy()
 
         logger.debug("Saving expert...")
-        learner.to_yaml(self.save_path + f"/{expert_name}")
-        
+
+        agent_config: AgentConfig = AgentConfig(
+            name=expert_name,
+            **learner.agent_save_state.model_dump(),
+        )
+        agent_config.to_yaml(self.save_path + f"/{expert_name}")
+
         logger.debug(f"Saved expert: {expert_name}")
-
-if __name__ == "__main__":
-    import os
-
-    load_dotenv()
-
-    campus = Campus(
-        global_task="Write poems.",
-        save_path="./",
-        model=OpenAIResponses(
-            id="gpt-4.1-mini", api_key=os.getenv(f"OPENAI_TEST_API_KEY")
-        ),
-    )
-
-    campus.train_new_expert("Nature poems", "Poems about the nature.")

@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.mark.api
-def test_run_campus(g_data):
+def test_train_new_expert(g_data):
     campus = Campus(
         global_task="Write poems.",
         save_path="./tests/data",
@@ -13,3 +13,8 @@ def test_run_campus(g_data):
     )
 
     campus.train_new_expert("Nature poems", "Poems about the nature.")
+    assert True
+    
+    
+def test_list_all_experts():
+    pass

@@ -19,12 +19,10 @@ class CasterAgent(Agent):
 
     @wraps(Agent.__init__)
     def __init__(self, model: Model, campus: Campus, global_task: str, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(**kwargs, model=model, output_schema=CasterOutput)
 
-        self.model = model
         self.campus = campus
         self.global_task = global_task
-        self.output_model = CasterOutput
 
         def train_new_expert(expert_task: str, expert_name: str) -> None:
             self.campus.train_new_expert(

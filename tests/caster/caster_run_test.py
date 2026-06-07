@@ -1,3 +1,5 @@
+from caster.models.caster_output import CasterOutput
+from agno.run.agent import RunOutput
 import logging
 import random
 
@@ -11,18 +13,19 @@ LOGGER = logging.getLogger(__name__)
 import pytest
 
 prompt = """
-Set up an automated backup system for a local Docker environment. It needs to safely stop specific containers, compress and backup their appdata directories to a secondary NAS drive, restart the containers, and send a status notification when finished.
+Write a poem about flowers.
 """
 
 
 @pytest.mark.api
 def test_caster_run(g_data):
-    campus = Campus(
+    campus: Campus = Campus(
         global_task="Write poems.",
         save_path="./tests/data/dummy_experts",
         model=g_data["model"],
     )
-
+    
+    LOGGER.info(type(g_data["model"]))
     caster = CasterAgent(
         model=g_data["model"], global_task="Write poetic poems.", campus=campus
     )
@@ -31,5 +34,9 @@ def test_caster_run(g_data):
 
     LOGGER.info(caster.system_message)
 
-    LOGGER.info(caster.run("Hallo, was sind die Experten"))
-    LOGGER.info("Hallo")
+
+    output: RunOutput = caster.run(prompt)
+
+    caster_out: CasterOutput = output.content
+    
+    LOGGER.info(caster_out.assigned_tasks)

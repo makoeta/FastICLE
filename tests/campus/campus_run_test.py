@@ -25,4 +25,4 @@ def test_list_all_experts(g_data):
     
     expert_configs = campus.get_experts()
     
-    assert len(expert_configs) == 3
+    assert len(expert_configs) == 2

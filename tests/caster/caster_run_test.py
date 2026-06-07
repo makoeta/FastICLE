@@ -24,7 +24,6 @@ def test_caster_run(g_data):
         save_path="./tests/data/dummy_experts",
         model=g_data["model"],
     )
-    
     LOGGER.info(type(g_data["model"]))
     caster = CasterAgent(
         model=g_data["model"], global_task="Write poetic poems.", campus=campus
@@ -32,11 +31,8 @@ def test_caster_run(g_data):
 
     caster.update_system_message()
 
-    LOGGER.info(caster.system_message)
-
-
     output: RunOutput = caster.run(prompt)
 
     caster_out: CasterOutput = output.content
     
-    LOGGER.info(caster_out.assigned_tasks)
+    assert caster_out.assigned_tasks[0].agent_ids[0].lower() == "nature poem writer"

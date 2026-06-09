@@ -1,15 +1,10 @@
-from pydantic import Field
 from typing import Annotated
-from pydantic import BaseModel
-
 
 from pydantic import BaseModel, Field
 
 
 class TaskAssignment(BaseModel):
-    agent_ids: list[str] = Field(
-        description="A list of assigned agent IDs. (Use ['train_new_expert'] if no existing expert fits and a new one must be trained)."
-    )
+    agent_id: str = Field(description="The identifier of the agent.")
     task_id: int = Field(description="The integer ID of the task.")
 
 

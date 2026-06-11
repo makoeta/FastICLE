@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Annotated
 
@@ -18,8 +19,6 @@ from campus.prompts import (
     icrl_agent_system_prompt,
     reward_agent_system_prompt,
 )
-from loguru import logger
-
 
 
 class Campus(BaseModel):
@@ -28,22 +27,26 @@ class Campus(BaseModel):
 
     global_task: Annotated[str, Field()]
 
-    save_path: Annotated[str, Field(default="~")]
+    expert_save_dir: Annotated[
+        str, Field(default_factory=lambda: os.environ.get("EXPERT_SAVE_DIR", "./"))
+    ]
     auto_save: Annotated[bool, Field(default=True)]
     agent_configs: Annotated[list[ExpertConfig], Field(default_factory=list)]
 
     model: Model
-    
+
     def get_experts(self) -> list[ExpertConfig]:
         expert_configs: list[ExpertConfig] = list()
-        
-        for yaml_file in Path(self.save_path).glob("*.yaml"):
+
+        for yaml_file in Path(self.expert_save_dir).glob("*.yaml"):
             try:
                 expert_config: ExpertConfig = ExpertConfig.from_yaml(yaml_file)
                 expert_configs.append(expert_config)
             except Exception as e:
-                logger.warning(f"Could not load expert config ({str(yaml_file.absolute())}): {e}")
-        
+                logger.warning(
+                    f"Could not load expert config ({str(yaml_file.absolute())}): {e}"
+                )
+
         return expert_configs
 
     def __generate_synth_learning_tasks(self, expert_task):
@@ -63,9 +66,11 @@ class Campus(BaseModel):
 
         return task_list
 
-    def train_new_expert(self, expert_name: str, expert_task: str, description: str) -> None:
+    def train_new_expert(
+        self, expert_name: str, expert_task: str, description: str
+    ) -> None:
         """Use this method to train a new expert for the campus.
-        
+
         Args:
             expert_name (str): Name of the expert. Used later for task allocation
             expert_task (str): Task the expert is the specialist for.
@@ -113,6 +118,6 @@ class Campus(BaseModel):
             description=description,
             **learner.agent_save_state.model_dump(),
         )
-        agent_config.to_yaml(self.save_path + f"/{expert_name}")
+        agent_config.to_yaml(self.expert_save_dir + f"/{expert_name}")
 
         logger.debug(f"Saved expert: {expert_name}")

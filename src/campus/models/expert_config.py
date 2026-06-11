@@ -1,3 +1,4 @@
+from agno.agent import Agent
 from pathlib import Path
 from typing import Annotated
 
@@ -19,6 +20,10 @@ class ExpertConfig(AgentSaveState):
 
         with open(path, "w") as outfile:
             yaml.dump(self.model_dump(mode="json"), outfile, default_flow_style=False)
+
+    def to_agent(self) -> Agent:
+        return Agent(name=self.name, system_message=self.description)
+        
 
     @classmethod
     def from_yaml(cls, path: str | Path):

@@ -1,6 +1,6 @@
-from pydantic import Field
 from typing import Annotated
-from pydantic import BaseModel
+
+from pydantic import BaseModel, Field
 
 
 class DispatcherTask(BaseModel):
@@ -19,5 +19,10 @@ class RuntimeTask(CasterTask):
 class DispatcherTaskList(BaseModel):
     task_list: list[DispatcherTask]
 
+
 class CasterTaskList(BaseModel):
     task_list: list[CasterTask]
+
+
+class RuntimeTaskList(BaseModel):
+    task_list: Annotated[list[RuntimeTask], Field(default_factory=list)]

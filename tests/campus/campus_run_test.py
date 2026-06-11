@@ -2,13 +2,16 @@
 from campus.core import Campus
 
 import pytest
+import logging
 
+from dotenv import load_dotenv
+
+LOGGER = logging.getLogger(__name__)
 
 @pytest.mark.api
 def test_train_new_expert(g_data):
     campus = Campus(
         global_task="Write poems.",
-        save_path="./tests/data",
         model=g_data["model"]
     )
 
@@ -17,11 +20,13 @@ def test_train_new_expert(g_data):
     
     
 def test_list_all_experts(g_data):
+    load_dotenv()
     campus = Campus(
         global_task="Write poems.",
-        save_path="./tests/data/dummy_experts",
         model=g_data["model"]
     )
+    
+    LOGGER.info(campus.expert_save_dir)
     
     expert_configs = campus.get_experts()
     

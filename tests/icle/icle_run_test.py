@@ -1,11 +1,8 @@
 from agno.run.workflow import WorkflowRunOutput
 from icle import ICLE
-from dispatcher.core import DispatcherAgent
 import logging
 import pytest
 
-from campus.core import Campus
-from caster.core import CasterAgent
 
 LOGGER = logging.getLogger(__name__)
 import pytest
@@ -18,22 +15,7 @@ global_task = "Poem writing."
 
 @pytest.mark.api
 def test_caster_run(g_data):
-    campus: Campus = Campus(
-        global_task=global_task,
-        save_path="./tests/data/dummy_experts",
-        model=g_data["model"],
-    )
-    
-    caster = CasterAgent(
-        model=g_data["model"], global_task=global_task, campus=campus
-    )
-    caster.update_system_message()
-    LOGGER.info(caster.system_message)
-
-    dispatcher: DispatcherAgent = DispatcherAgent(g_data["model"])
-    
-    
-    icle: ICLE = ICLE(dispatcher_agent=dispatcher, caster_agent=caster)
+    icle: ICLE = ICLE(global_task=global_task, model=g_data["model"], expert_save_dir="./tests/data/dummy_experts")
     
     LOGGER.info(len(icle.caster_agent.campus.get_experts()))
     

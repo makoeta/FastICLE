@@ -2,7 +2,7 @@ from assembler.core import Assembler
 from runtime.core import Runtime
 from campus.core import Campus
 from agno.models.base import Model
-from step_identifier import STEP_IDENTIFIER
+from models.step_identifier import STEP_IDENTIFIER
 
 from agno.workflow import Step, Workflow
 

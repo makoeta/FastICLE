@@ -1,23 +1,24 @@
+import logging
 import os
 from pathlib import Path
 from typing import Annotated
 
 from agno.agent import Agent
 from agno.models.base import Model
-from agno.models.openai import OpenAIResponses
 from agno.run.agent import RunOutput
 from fasticrl.icrl_learner import ICRLLearner
 from pydantic import BaseModel, ConfigDict, Field
-import logging
+
 from campus.models.expert_config import ExpertConfig
-from campus.models.reward_output import RewardOutput
 from campus.models.training_task_list import TrainingTaskList
 from campus.prompts import (
-    campus_agent_system_prompt,
-    icrl_agent_system_prompt,
+    CAMPUS_AGENT_SYSTEM_PROMPT,
+    ICRL_AGENT_SYSTEM_PROMPT,
 )
 
 LOGGER = logging.getLogger(__name__)
+
+
 class Campus(BaseModel):
 
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
@@ -33,7 +34,7 @@ class Campus(BaseModel):
     learner_model: Model
     reward_model: Model
     strategy_model: Model
-    
+
     task_generator_model: Model
 
     def get_experts(self) -> list[ExpertConfig]:
@@ -54,7 +55,7 @@ class Campus(BaseModel):
         task_agent = Agent(
             model=self.task_generator_model,
             output_schema=TrainingTaskList,
-            system_message=campus_agent_system_prompt,
+            system_message=CAMPUS_AGENT_SYSTEM_PROMPT,
         )
 
         run_output: RunOutput = task_agent.run(f"""Global task: {self.global_task}
@@ -87,7 +88,7 @@ class Campus(BaseModel):
             learner_model=self.learner_model,
             reward_model=self.reward_model,
             strategy_model=self.strategy_model,
-            task_description=icrl_agent_system_prompt.format(
+            task_description=ICRL_AGENT_SYSTEM_PROMPT.format(
                 global_task=self.global_task, expert_task=expert_task
             ),
             tasks=task_list.tasks,

@@ -115,12 +115,14 @@ def build_casting_prompt(
 ) -> str:
     if multi_expert_mode:
         mode_sub_prompt = CASTING_MULTI_MODE_SUB_PROMPT
-        task_scope      = "each sub-task"
+        task_scope = "each sub-task"
         assignment_rule = "Assign one ID per sub-task. Ensure ONE general expert is always included as coordinator/fallback."
     else:
         mode_sub_prompt = CASTING_SINGLE_MODE_SUB_PROMPT
-        task_scope      = "the task"
-        assignment_rule = "Assign exactly ONE specialist ID. A general expert is NOT permitted."
+        task_scope = "the task"
+        assignment_rule = (
+            "Assign exactly ONE specialist ID. A general expert is NOT permitted."
+        )
 
     return CASTING_AGENT_SYSTEM_PROMPT.format(
         mode_sub_prompt=mode_sub_prompt,

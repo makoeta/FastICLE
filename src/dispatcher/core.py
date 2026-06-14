@@ -5,7 +5,6 @@ from agno.agent import Agent
 from agno.models.base import Model
 
 
-
 class DispatcherAgent(Agent):
 
     @wraps(Agent.__init__)

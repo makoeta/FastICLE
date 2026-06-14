@@ -33,7 +33,7 @@ class Assembler(BaseModel):
             user_input=step_input.get_input_as_string(),
             sub_agent_outputs=step_input.get_last_step_content().to_xml(),
         )
-        
+
         LOGGER.info(assembler_input_prompt)
 
         assembler_out: RunOutput = assembler_agent.run(assembler_input_prompt)

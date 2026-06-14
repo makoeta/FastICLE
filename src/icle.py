@@ -28,7 +28,7 @@ class ICLE(Workflow):
             learner_model=model,
             reward_model=model,
             strategy_model=model,
-            task_generator_model=model
+            task_generator_model=model,
         )
 
         self.caster_agent: CasterAgent = CasterAgent(

@@ -11,7 +11,13 @@ YAML_SUFFIX = ".yaml"
 
 class ExpertConfig(AgentSaveState):
     name: Annotated[str, Field()]
-    description: Annotated[str, Field(description="A short description about this expert.", default="No description available.")]
+    description: Annotated[
+        str,
+        Field(
+            description="A short description about this expert.",
+            default="No description available.",
+        ),
+    ]
 
     def to_yaml(self, path: str):
 
@@ -23,7 +29,6 @@ class ExpertConfig(AgentSaveState):
 
     def to_agent(self) -> Agent:
         return Agent(name=self.name, system_message=self.description)
-        
 
     @classmethod
     def from_yaml(cls, path: str | Path):

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class DispatcherTask(BaseModel):
     order_number: Annotated[int, Field(description="Order of the task being executed.")]
     description: Annotated[str, Field(description="Description of the task.")]
-    
+
     def __str__(self) -> str:
         lines = [f"[{self.__class__.__name__}]"]
         for field_name in self.__class__.model_fields:
@@ -26,7 +26,9 @@ class DispatcherTask(BaseModel):
 
 
 class CasterTask(DispatcherTask):
-    agent_ids: Annotated[list[str], Field(description="Assigned Agent", default_factory=list)]
+    agent_ids: Annotated[
+        list[str], Field(description="Assigned Agent", default_factory=list)
+    ]
 
 
 class RuntimeTask(CasterTask):
@@ -43,7 +45,7 @@ class CasterTaskList(BaseModel):
 
 class RuntimeTaskList(BaseModel):
     task_list: Annotated[list[RuntimeTask], Field(default_factory=list)]
-    
+
     def to_xml(self) -> str:
         tasks_xml = "\n".join(task.to_xml() for task in self.task_list)
         return f"<tasks>\n{tasks_xml}\n</tasks>"

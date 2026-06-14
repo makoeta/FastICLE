@@ -22,11 +22,17 @@ def test_caster_run(g_data):
     campus: Campus = Campus(
         global_task="Write poems.",
         save_path="./tests/data/dummy_experts",
-        model=g_data["model"],
+        learner_model=g_data["model"],
+        reward_model=g_data["model"],
+        strategy_model=g_data["model"],
+        task_generator_model=g_data["model"],
     )
     LOGGER.info(type(g_data["model"]))
     caster = CasterAgent(
-        model=g_data["model"], global_task="Write poetic poems.", campus=campus
+        model=g_data["model"],
+        global_task="Write poetic poems.",
+        campus=campus,
+        multi_expert_mode=True,
     )
 
     caster.update_system_message()
@@ -34,7 +40,7 @@ def test_caster_run(g_data):
     output: RunOutput = caster.run(prompt)
 
     caster_out: CasterTaskList = output.content
-    
+
     LOGGER.info(caster_out)
-    
+
     assert len(caster_out.task_list) > 0

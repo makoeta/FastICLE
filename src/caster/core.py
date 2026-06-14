@@ -28,7 +28,7 @@ class CasterAgent(Agent):
         model: Model,
         campus: Campus,
         global_task: str,
-        multi_expert_mode: bool,
+        multi_expert_mode: bool = False,
         **kwargs,
     ):
         super().__init__()

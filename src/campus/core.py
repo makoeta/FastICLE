@@ -79,10 +79,8 @@ class Campus(BaseModel):
         """
 
         expert_name = expert_name.replace(" ", "_").lower()
-
-        LOGGER.debug(f"Creating synthetic tasks for '{expert_task}'...")
+        LOGGER.info(f"New expert is being created: {expert_name}")
         task_list: TrainingTaskList = self.__generate_synth_learning_tasks(expert_task)
-        LOGGER.debug(f"...created {len(task_list.tasks)} tasks.")
 
         learner = ICRLLearner(
             learner_model=self.learner_model,
@@ -94,11 +92,8 @@ class Campus(BaseModel):
             tasks=task_list.tasks,
         )
 
-        LOGGER.debug(f"Start training")
         learner.auto_learn()
         learner.update_strategy()
-
-        LOGGER.debug("Saving expert...")
 
         agent_config: ExpertConfig = ExpertConfig(
             name=expert_name,
@@ -107,4 +102,4 @@ class Campus(BaseModel):
         )
         agent_config.to_yaml(self.expert_save_dir + f"/{expert_name}")
 
-        LOGGER.debug(f"Saved expert: {expert_name}")
+        LOGGER.info(f"{expert_name.capitalize()} was created.")

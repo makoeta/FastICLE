@@ -42,7 +42,7 @@ class CasterAgent(Agent):
         def train_new_expert(
             expert_task: str, expert_name: str, short_description: str
         ) -> None:
-            LOGGER.info(f"TRAIN NEW EXPERT: {expert_name}")
+            LOGGER.info(f"Requesting new expert: {expert_name}")
             self.campus.train_new_expert(
                 expert_name=expert_name,
                 expert_task=expert_task,
@@ -68,7 +68,5 @@ class CasterAgent(Agent):
     @wraps(Agent.run)
     def run(self, *args, **kwargs):
         self.update_system_message()
-        LOGGER.info("Caster System Message:")
-        LOGGER.info(self.system_message)
 
         return super().run(*args, **kwargs)

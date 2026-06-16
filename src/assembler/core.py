@@ -38,6 +38,7 @@ class Assembler:
         self.assembler_agent = AssemblerAgent(model=model)
 
     def assemble(self, step_input: StepInput, run_context: RunContext) -> StepOutput:
+        LOGGER.info("Starting assembling...")
         user_input = run_context.session_state.get("user_input", "")
 
         assembler_input_prompt: str = ASSEMBLER_INPUT_PROMPT.format(
@@ -52,4 +53,5 @@ class Assembler:
             usage["input_tokens"] += assembler_out.metrics.input_tokens or 0
             usage["output_tokens"] += assembler_out.metrics.output_tokens or 0
 
+        LOGGER.info("Assembling finished.")
         return StepOutput(content=assembler_out.content)

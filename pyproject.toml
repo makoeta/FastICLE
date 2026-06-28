@@ -16,8 +16,3 @@ dependencies = [
 test = [
     "openai>=2.38.0",
 ]
-
-[tool.uv.sources]
-fasticrl = { path = "../FastICRL" }
-
-

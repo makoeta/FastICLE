@@ -47,9 +47,11 @@ class Assembler:
         )
 
         assembler_out: RunOutput = self.assembler_agent.run(assembler_input_prompt)
-        
+
         if assembler_out.metrics:
-            usage = run_context.session_state.setdefault("token_usage", {"input_tokens": 0, "output_tokens": 0})
+            usage = run_context.session_state.setdefault(
+                "token_usage", {"input_tokens": 0, "output_tokens": 0}
+            )
             usage["input_tokens"] += assembler_out.metrics.input_tokens or 0
             usage["output_tokens"] += assembler_out.metrics.output_tokens or 0
 

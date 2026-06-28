@@ -4,8 +4,17 @@ from pydantic import BaseModel, Field
 
 
 class DispatcherTask(BaseModel):
-    order_number: Annotated[int, Field(description="Order of the task being executed.")]
+    task_id: Annotated[
+        str, Field(description="Unique identifier for this task (e.g. 'T1', 'T2').")
+    ]
     description: Annotated[str, Field(description="Description of the task.")]
+    depends_on: Annotated[
+        list[str],
+        Field(
+            description="List of task_ids that must complete before this task starts. Empty list means no dependencies.",
+            default_factory=list,
+        ),
+    ]
 
     def __str__(self) -> str:
         lines = [f"[{self.__class__.__name__}]"]
@@ -18,8 +27,13 @@ class DispatcherTask(BaseModel):
         return self.__str__()
 
     def to_xml(self) -> str:
+        def _serialize(v) -> str:
+            if isinstance(v, list):
+                return escape(", ".join(str(i) for i in v))
+            return escape(str(v))
+
         fields_xml = "\n\t".join(
-            f"<{k}>{escape(str(getattr(self, k)))}</{k}>"
+            f"<{k}>{_serialize(getattr(self, k))}</{k}>"
             for k in self.__class__.model_fields
         )
         return f"<task>\n\t{fields_xml}\n</task>"

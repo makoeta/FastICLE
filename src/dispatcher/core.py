@@ -4,6 +4,8 @@ from functools import wraps
 from agno.agent import Agent
 from agno.models.base import Model
 
+from dispatcher.prompts import DISPATCHER_SYSTEM_PROMPT
+
 
 class DispatcherAgent(Agent):
 
@@ -13,6 +15,7 @@ class DispatcherAgent(Agent):
             name="Dispatcher",
             description="The Dispatcher Agent analyzes complex user requests and decomposes them into a logically ordered sequence of actionable sub-tasks for downstream delegation.",
             model=model,
+            system_message=DISPATCHER_SYSTEM_PROMPT,
             output_schema=DispatcherTaskList,
             **kwargs,
         )

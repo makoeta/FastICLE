@@ -7,10 +7,10 @@ from agno.models.base import Model
 from agno.run.agent import RunOutput
 from pydantic import Field
 
-from campus.core import Campus
-from caster.prompts import build_casting_prompt
+from icle.campus.core import Campus
+from icle.caster.prompts import build_casting_prompt
 
-from models.tasks import CasterTaskList
+from icle.models.tasks import CasterTaskList
 
 LOGGER = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from models.tasks import CasterTask, CasterTaskList, RuntimeTask
-from runtime.core import Runtime
+from icle.models.tasks import CasterTask, CasterTaskList, RuntimeTask
+from icle.runtime.core import Runtime
 
 LOGGER = __import__("logging").getLogger(__name__)
 

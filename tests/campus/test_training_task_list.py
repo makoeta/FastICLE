@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from campus.models.training_task_list import TrainingTaskList
+from icle.campus.models.training_task_list import TrainingTaskList
 
 
 def test_creation_with_tasks():

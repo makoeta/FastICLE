@@ -1,13 +1,13 @@
-from assembler.core import Assembler
-from runtime.core import Runtime
-from campus.core import Campus
+from icle.assembler.core import Assembler
+from icle.runtime.core import Runtime
+from icle.campus.core import Campus
 from agno.models.base import Model
-from models.step_identifier import STEP_IDENTIFIER
+from icle.models.step_identifier import STEP_IDENTIFIER
 
 from agno.workflow import Step, Workflow
 
-from caster.core import CasterAgent
-from dispatcher.core import DispatcherAgent
+from icle.caster.core import CasterAgent
+from icle.dispatcher.core import DispatcherAgent
 
 
 class ICLE(Workflow):

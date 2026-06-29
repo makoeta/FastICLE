@@ -9,9 +9,9 @@ from agno.run.agent import RunOutput
 from fasticrl.icrl_learner import ICRLLearner
 from pydantic import BaseModel, ConfigDict, Field
 
-from campus.models.expert_config import ExpertConfig
-from campus.models.training_task_list import TrainingTaskList
-from campus.prompts import (
+from icle.campus.models.expert_config import ExpertConfig
+from icle.campus.models.training_task_list import TrainingTaskList
+from icle.campus.prompts import (
     CAMPUS_AGENT_SYSTEM_PROMPT,
     ICRL_AGENT_SYSTEM_PROMPT,
 )

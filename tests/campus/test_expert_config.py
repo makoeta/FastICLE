@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from agno.agent import Agent
 
-from campus.models.expert_config import ExpertConfig, YAML_SUFFIX
+from icle.campus.models.expert_config import ExpertConfig, YAML_SUFFIX
 
 DUMMY_EXPERTS_DIR = Path(__file__).parent.parent / "data" / "dummy_experts"
 GENERAL_POEM_WRITER = DUMMY_EXPERTS_DIR / "general_poem_writer.yaml"

@@ -101,8 +101,8 @@ On the first run the Caster will train any missing experts before executing. On 
 ## Project Structure
 
 ```text
-src/
-├── icle.py               # Top-level ICLE workflow
+src/icle/
+├── __init__.py           # Top-level ICLE workflow (exports ICLE)
 ├── dispatcher/           # Decomposes input into a task graph
 ├── caster/               # Expert assignment & on-demand training
 ├── campus/               # Expert training via ICRL

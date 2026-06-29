@@ -1,5 +1,5 @@
-from models.tasks import DispatcherTaskList
-from dispatcher.core import DispatcherAgent
+from icle.models.tasks import DispatcherTaskList
+from icle.dispatcher.core import DispatcherAgent
 from agno.agent import Agent
 from agno.run.agent import RunOutput
 

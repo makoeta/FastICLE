@@ -4,7 +4,7 @@ from agno.workflow import StepOutput
 from agno.workflow import StepInput
 from pydantic import BaseModel
 from agno.models.base import Model
-from assembler.prompts import ASSEMBLER_AGENT_PROMPT
+from icle.assembler.prompts import ASSEMBLER_AGENT_PROMPT
 from agno.agent import Agent
 import logging
 

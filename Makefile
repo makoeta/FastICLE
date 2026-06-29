@@ -9,8 +9,7 @@ TESTS  := tests
 help:
 	@echo "Usage: make <target>"
 	@echo ""
-	@echo "  install       Install runtime dependencies into .venv
-  install-dev   Install runtime + test dependencies into .venv"
+	@echo "  install       Install runtime dependencies into .venv - install-dev   Install runtime + test dependencies into .venv"
 	@echo "  test          Run unit tests (no API calls)"
 	@echo "  test-api      Run all tests including live API calls"
 	@echo "  format        Auto-format source and tests with black"

@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import pytest
 from pydantic import ValidationError
 
-from models.tasks import (
+from icle.models.tasks import (
     CasterTask,
     CasterTaskList,
     DispatcherTask,

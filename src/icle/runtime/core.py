@@ -10,8 +10,8 @@ from agno.workflow import StepInput, StepOutput
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-from campus.models.expert_config import ExpertConfig
-from models.tasks import CasterTask, CasterTaskList, RuntimeTask, RuntimeTaskList
+from icle.campus.models.expert_config import ExpertConfig
+from icle.models.tasks import CasterTask, CasterTaskList, RuntimeTask, RuntimeTaskList
 
 load_dotenv()
 LOGGER = logging.getLogger(__name__)

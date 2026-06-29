@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from campus.core import Campus
-from campus.models.expert_config import ExpertConfig
+from icle.campus.core import Campus
+from icle.campus.models.expert_config import ExpertConfig
 
 DUMMY_EXPERTS_DIR = str(Path(__file__).parent.parent / "data" / "dummy_experts")
 

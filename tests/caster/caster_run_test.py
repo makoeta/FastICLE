@@ -1,11 +1,11 @@
-from models.tasks import CasterTaskList
+from icle.models.tasks import CasterTaskList
 from agno.run.agent import RunOutput
 import logging
 
 import pytest
 
-from campus.core import Campus
-from caster.core import CasterAgent
+from icle.campus.core import Campus
+from icle.caster.core import CasterAgent
 
 LOGGER = logging.getLogger(__name__)
 

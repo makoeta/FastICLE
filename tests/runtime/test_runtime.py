@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, patch
 
 from agno.workflow import StepInput, StepOutput
 
-from models.tasks import CasterTask, CasterTaskList, RuntimeTaskList
-from runtime.core import Runtime
+from icle.models.tasks import CasterTask, CasterTaskList, RuntimeTaskList
+from icle.runtime.core import Runtime
 
 DUMMY_EXPERTS_DIR = str(Path(__file__).parent.parent / "data" / "dummy_experts")
 
@@ -28,7 +28,7 @@ class TestRuntimeRunTask:
             agent_ids=["nature_poem_writer"],
         )
 
-        with patch("runtime.core.Team") as MockTeam:
+        with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
             mock_run_output.content = "A beautiful poem about nature."
             MockTeam.return_value.run.return_value = mock_run_output
@@ -48,7 +48,7 @@ class TestRuntimeRunTask:
             agent_ids=["nature_poem_writer"],
         )
 
-        with patch("runtime.core.Team") as MockTeam:
+        with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
             mock_run_output.content = "output"
             MockTeam.return_value.run.return_value = mock_run_output
@@ -76,7 +76,7 @@ class TestRuntimeStepExecution:
         mock_step_input = MagicMock(spec=StepInput)
         mock_step_input.get_last_step_content.return_value = caster_task_list
 
-        with patch("runtime.core.Team") as MockTeam:
+        with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
             mock_run_output.content = "A poem."
             MockTeam.return_value.run.return_value = mock_run_output
@@ -98,7 +98,7 @@ class TestRuntimeStepExecution:
         mock_step_input = MagicMock(spec=StepInput)
         mock_step_input.get_last_step_content.return_value = caster_task_list
 
-        with patch("runtime.core.Team") as MockTeam:
+        with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
             mock_run_output.content = "output"
             MockTeam.return_value.run.return_value = mock_run_output

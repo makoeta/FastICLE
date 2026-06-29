@@ -1,7 +1,7 @@
 from agno.agent import Agent
 
-from assembler.core import ASSEMBLER_INPUT_PROMPT, Assembler, AssemblerAgent
-from assembler.prompts import ASSEMBLER_AGENT_PROMPT
+from icle.assembler.core import ASSEMBLER_INPUT_PROMPT, Assembler, AssemblerAgent
+from icle.assembler.prompts import ASSEMBLER_AGENT_PROMPT
 
 
 class TestAssemblerInstantiation:

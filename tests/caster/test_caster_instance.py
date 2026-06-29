@@ -4,9 +4,9 @@ from unittest.mock import patch
 import pytest
 from agno.agent import Agent
 
-from campus.core import Campus
-from caster.core import CasterAgent
-from models.tasks import CasterTaskList
+from icle.campus.core import Campus
+from icle.caster.core import CasterAgent
+from icle.models.tasks import CasterTaskList
 
 DUMMY_EXPERTS_DIR = str(Path(__file__).parent.parent / "data" / "dummy_experts")
 

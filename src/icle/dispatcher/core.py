@@ -1,10 +1,10 @@
-from models.tasks import DispatcherTaskList
+from icle.models.tasks import DispatcherTaskList
 from functools import wraps
 
 from agno.agent import Agent
 from agno.models.base import Model
 
-from dispatcher.prompts import DISPATCHER_SYSTEM_PROMPT
+from icle.dispatcher.prompts import DISPATCHER_SYSTEM_PROMPT
 
 
 class DispatcherAgent(Agent):

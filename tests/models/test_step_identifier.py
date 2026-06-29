@@ -1,4 +1,4 @@
-from models.step_identifier import STEP_IDENTIFIER
+from icle.models.step_identifier import STEP_IDENTIFIER
 
 
 def test_dispatch_value():

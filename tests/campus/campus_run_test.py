@@ -3,8 +3,8 @@ import logging
 
 import pytest
 
-from campus.core import Campus
-from campus.models.expert_config import ExpertConfig
+from icle.campus.core import Campus
+from icle.campus.models.expert_config import ExpertConfig
 
 LOGGER = logging.getLogger(__name__)
 

@@ -24,7 +24,7 @@ def make_step_input(tasks: list[CasterTask]):
     return step_input
 
 
-def fake_run_task(task: CasterTask, _prior_outputs=None) -> RuntimeTask:
+def fake_run_task(task: CasterTask, _prior_context: str = "") -> RuntimeTask:
     return RuntimeTask(**task.model_dump(), task_output=f"output_for_{task.description}")
 
 
@@ -39,7 +39,7 @@ def test_independent_tasks_run_concurrently(runtime):
     """Tasks with no shared dependencies must execute in parallel threads."""
     barrier = threading.Barrier(2, timeout=3.0)
 
-    def rendezvous_task(task, _prior_outputs=None):
+    def rendezvous_task(task, _prior_context: str = ""):
         # Both threads must reach this point before either can proceed —
         # raises BrokenBarrierError if tasks run sequentially.
         barrier.wait()
@@ -59,7 +59,7 @@ def test_dependent_task_waits_for_dependencies(runtime):
     completed_ids: list[str] = []
     lock = threading.Lock()
 
-    def tracking_task(task, _prior_outputs=None):
+    def tracking_task(task, _prior_context: str = ""):
         time.sleep(0.02)
         with lock:
             completed_ids.append(task.task_id)

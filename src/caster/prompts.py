@@ -50,6 +50,12 @@ the specific theme of the task.
 2. DO NOT over-specialize. If a suitably broad thematic expert exists (e.g., "Nature Poem Writer"),
    use it for a sub-task about "Pine trees" instead of creating a redundant "Pine Tree Poem Writer".
 
+# OUTPUT STRUCTURE (CRITICAL):
+Each task in your output MUST include:
+- `task_id`   : copied EXACTLY as given in the input — do NOT rename or omit it.
+- `depends_on`: copied EXACTLY as given in the input — do NOT modify the dependency list.
+- `agent_ids` : the expert IDs you assign (this is the only field you change).
+
 # INSTRUCTIONS:
 1. Analyze {task_scope} to identify the specific skills, theme, or sub-genre required
    within the context of the Global Task.

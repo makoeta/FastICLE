@@ -119,25 +119,16 @@ wheels = [
 [[package]]
 name = "fasticrl"
 version = "1.0.0"
-source = { directory = "../FastICRL" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agno" },
     { name = "pyyaml" },
     { name = "tqdm" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "agno", specifier = ">=2.6.5" },
-    { name = "ollama", marker = "extra == 'ollama'", specifier = ">=0.6.2" },
-    { name = "openai", marker = "extra == 'openai'", specifier = ">=2.32.0" },
-    { name = "pyyaml", specifier = ">=6.0.3" },
-    { name = "tqdm", specifier = ">=4.67.3" },
+sdist = { url = "https://files.pythonhosted.org/packages/e3/82/35f563d048101cad2805583835648e1e45e18367e96199c511f34de837e9/fasticrl-1.0.0.tar.gz", hash = "sha256:5ae4bda7966e9752d7e4ba54d7bcfe08d883a0bbbf2255c78de2fcb5529e7b95", size = 8395, upload-time = "2026-06-28T22:56:19.901Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/34/92/5b6a5394bdc5b84720ae97511d78688b3ae314a5a183d93be4e9e82b05af/fasticrl-1.0.0-py3-none-any.whl", hash = "sha256:cb6afcf207f6dd39bcd9369cf75f4df3519a53d6d2a07819ba4d1a65a1844074", size = 13993, upload-time = "2026-06-28T22:56:18.7Z" },
 ]
-provides-extras = ["openai", "ollama"]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.0.0" }]
 
 [[package]]
 name = "gitdb"
@@ -238,28 +229,28 @@ wheels = [
 
 [[package]]
 name = "icle"
-version = "1.0.2rc0"
-source = { virtual = "." }
+version = "1.0.2"
+source = { editable = "." }
 dependencies = [
     { name = "agno" },
     { name = "fastapi" },
     { name = "fasticrl" },
-    { name = "pytest" },
     { name = "python-dotenv" },
 ]
 
 [package.optional-dependencies]
 test = [
     { name = "openai" },
+    { name = "pytest" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "agno", specifier = ">=2.6.9" },
     { name = "fastapi", specifier = ">=0.136.3" },
-    { name = "fasticrl", directory = "../FastICRL" },
+    { name = "fasticrl", specifier = ">=1.0.0" },
     { name = "openai", marker = "extra == 'test'", specifier = ">=2.38.0" },
-    { name = "pytest", specifier = ">=9.0.3" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=9.0.3" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
 ]
 provides-extras = ["test"]

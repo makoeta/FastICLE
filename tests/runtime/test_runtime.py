@@ -23,7 +23,7 @@ class TestRuntimeRunTask:
     def test_run_task_returns_runtime_task(self, mock_model):
         runtime = Runtime(model=mock_model, expert_save_dir=DUMMY_EXPERTS_DIR)
         caster_task = CasterTask(
-            order_number=1,
+            task_id="T1",
             description="Write a nature poem.",
             agent_ids=["nature_poem_writer"],
         )
@@ -35,7 +35,7 @@ class TestRuntimeRunTask:
 
             result = runtime._run_task(caster_task)
 
-        assert result.order_number == 1
+        assert result.task_id == "T1"
         assert result.description == "Write a nature poem."
         assert result.agent_ids == ["nature_poem_writer"]
         assert result.task_output == "A beautiful poem about nature."
@@ -43,7 +43,7 @@ class TestRuntimeRunTask:
     def test_run_task_loads_expert_from_yaml(self, mock_model):
         runtime = Runtime(model=mock_model, expert_save_dir=DUMMY_EXPERTS_DIR)
         caster_task = CasterTask(
-            order_number=1,
+            task_id="T1",
             description="Write a nature poem.",
             agent_ids=["nature_poem_writer"],
         )
@@ -55,7 +55,6 @@ class TestRuntimeRunTask:
 
             runtime._run_task(caster_task)
 
-            # Team should have been called with the loaded expert(s)
             assert MockTeam.called
             call_kwargs = MockTeam.call_args
             assert "members" in call_kwargs.kwargs
@@ -70,7 +69,7 @@ class TestRuntimeStepExecution:
 
         caster_task_list = CasterTaskList(
             task_list=[
-                CasterTask(order_number=1, description="Write poem.", agent_ids=["nature_poem_writer"]),
+                CasterTask(task_id="T1", description="Write poem.", agent_ids=["nature_poem_writer"]),
             ]
         )
 
@@ -91,8 +90,8 @@ class TestRuntimeStepExecution:
 
         caster_task_list = CasterTaskList(
             task_list=[
-                CasterTask(order_number=1, description="Task 1", agent_ids=["nature_poem_writer"]),
-                CasterTask(order_number=2, description="Task 2", agent_ids=["general_poem_writer"]),
+                CasterTask(task_id="T1", description="Task 1", agent_ids=["nature_poem_writer"]),
+                CasterTask(task_id="T2", description="Task 2", agent_ids=["general_poem_writer"]),
             ]
         )
 

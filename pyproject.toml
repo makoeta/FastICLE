@@ -1,18 +1,45 @@
 [project]
 name = "icle"
-version = "1.0.2pre"
-description = "TODO: Package description // refer to future paper"
+version = "1.0.2"
+description = "Multi-agent framework that trains and orchestrates specialized Expert Agents on-demand via In-Context Reinforcement Learning."
 readme = "README.md"
 requires-python = ">=3.13"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Maximilian König", email = "makoeta@gmx.de" },
+]
+keywords = ["llm", "agents", "multi-agent", "in-context-learning", "reinforcement-learning", "mixture-of-experts"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "agno>=2.6.9",
     "fastapi>=0.136.3",
-    "fasticrl",
-    "pytest>=9.0.3",
+    "fasticrl>=1.0.0",
     "python-dotenv>=1.2.2",
 ]
 
 [project.optional-dependencies]
 test = [
     "openai>=2.38.0",
+    "pytest>=9.0.3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/makoeta/ICLE"
+Source = "https://github.com/makoeta/ICLE"
+Issues = "https://github.com/makoeta/ICLE/issues"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

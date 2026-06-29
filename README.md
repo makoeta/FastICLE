@@ -29,7 +29,7 @@ User Input
 | --- | --- | --- |
 | **Dispatch** | `DispatcherAgent` | Decomposes the user's request into an ordered, dependency-aware task graph |
 | **Cast** | `CasterAgent` | Assigns the best-fit Expert Agent(s) to each sub-task; trains new experts on-demand |
-| **Runtime** | `Runtime` | Resolves the task DAG and executes independent tasks in parallel via a thread pool |
+| **Runtime** | `Runtime` | Resolves the task DAG topologically; runs independent tasks in parallel via a thread pool; injects each task's declared dependency outputs as context into its prompt |
 | **Assemble** | `Assembler` | Collects all sub-agent outputs and synthesizes a single coherent final response |
 
 ### The Campus — Expert Training & Storage
@@ -37,7 +37,7 @@ User Input
 The **Campus** is where Expert Agents are born. When the Caster determines no suitable expert exists for a sub-task, it calls `train_new_expert`, which:
 
 1. **Generates a training curriculum** — a synthetic sequence of progressively harder tasks tailored to the required domain
-2. **Runs ICRL training** via [FastICRL](../FastICRL) — the agent iterates through tasks using an explore/exploit loop guided by reward signals
+2. **Runs ICRL training** via [FastICRL](https://github.com/makoeta/FastICRL) — the agent iterates through tasks using an explore/exploit loop guided by reward signals
 3. **Distills a strategy** — the agent's learned strategy is saved alongside its experience buffer as a `.yaml` file in the expert save directory
 
 Saved experts are loaded automatically on future runs, so the pool of available specialists grows over time.
@@ -56,9 +56,10 @@ The `CasterAgent` supports two modes:
 Requires Python ≥ 3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/your-org/ICLE.git
+git clone https://github.com/makoeta/ICLE.git
 cd ICLE
-uv sync
+make install        # runtime dependencies only
+make install-dev    # + test dependencies (pytest, openai test client)
 ```
 
 Copy the environment template and fill in your API key:
@@ -78,7 +79,7 @@ OPENAI_API_KEY=sk-...
 
 ```python
 from agno.models.openai import OpenAIChat
-from src.icle import ICLE
+from icle import ICLE
 
 model = OpenAIChat(id="gpt-4o")
 
@@ -121,7 +122,7 @@ tests/
 | Package | Role |
 | --- | --- |
 | [`agno`](https://github.com/agno-agi/agno) | Agent, Team, and Workflow orchestration |
-| [`fasticrl`](../FastICRL) | In-Context Reinforcement Learning engine |
+| [`fasticrl`](https://github.com/makoeta/FastICRL) | In-Context Reinforcement Learning engine |
 | `openai` | LLM backend |
 | `pydantic` | Structured outputs and data models |
 | `python-dotenv` | Environment configuration |
@@ -131,11 +132,8 @@ tests/
 ## Running Tests
 
 ```bash
-uv run pytest
+make test          # unit tests only (no API calls)
+make test-api      # full suite including live API calls
 ```
 
----
-
-## Research
-
-This project accompanies ongoing research on In-Context Learning Experts. See the `research/` directory for related materials.
+Tests require `make install-dev` to be run first.

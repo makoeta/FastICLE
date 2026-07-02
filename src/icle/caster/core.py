@@ -12,7 +12,7 @@ from icle.caster.prompts import build_casting_prompt
 
 from icle.models.tasks import CasterTaskList
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CasterAgent(Agent):
@@ -42,7 +42,7 @@ class CasterAgent(Agent):
         def train_new_expert(
             expert_task: str, expert_name: str, short_description: str
         ) -> None:
-            LOGGER.info(f"Requesting new expert: {expert_name}")
+            logger.info("Requesting new expert: %s", expert_name)
             self.campus.train_new_expert(
                 expert_name=expert_name,
                 expert_task=expert_task,

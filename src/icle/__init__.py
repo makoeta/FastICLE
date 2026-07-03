@@ -1,5 +1,9 @@
 import logging
 
+# Attached before the submodule imports below so that no record emitted
+# during import can reach Python's last-resort stderr handler.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
 from icle.assembler.core import Assembler
 from icle.runtime.core import Runtime
 from icle.campus.core import Campus
@@ -10,8 +14,6 @@ from agno.workflow import Step, Workflow
 
 from icle.caster.core import CasterAgent
 from icle.dispatcher.core import DispatcherAgent
-
-logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 
 class ICLE(Workflow):

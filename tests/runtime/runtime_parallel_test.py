@@ -29,8 +29,8 @@ def fake_run_task(task: CasterTask, _prior_context: str = "") -> RuntimeTask:
 
 
 @pytest.fixture
-def runtime(g_data):
-    return Runtime(expert_save_dir=DUMMY_EXPERTS_DIR, model=g_data["model"])
+def runtime(mock_model):
+    return Runtime(expert_save_dir=DUMMY_EXPERTS_DIR, model=mock_model)
 
 
 # --- Unit tests ---

@@ -5,6 +5,7 @@ from agno.workflow import StepInput
 from pydantic import BaseModel
 from agno.models.base import Model
 from icle.assembler.prompts import ASSEMBLER_AGENT_PROMPT
+from icle.models.tasks import RuntimeTaskList
 from agno.agent import Agent
 import logging
 
@@ -39,11 +40,21 @@ class Assembler:
 
     def assemble(self, step_input: StepInput, run_context: RunContext) -> StepOutput:
         LOGGER.info("Starting assembling...")
+
+        runtime_task_list: RuntimeTaskList = step_input.get_last_step_content()
+
+        # Single-node graph: there is nothing to synthesize across. Return the
+        # sole task's output verbatim instead of paying an extra LLM call that
+        # would, at best, paraphrase an already-complete answer.
+        if len(runtime_task_list.task_list) == 1:
+            LOGGER.info("Single task detected — skipping synthesis, returning output directly.")
+            return StepOutput(content=runtime_task_list.task_list[0].task_output)
+
         user_input = run_context.session_state.get("user_input", "")
 
         assembler_input_prompt: str = ASSEMBLER_INPUT_PROMPT.format(
             user_input=user_input,
-            sub_agent_outputs=step_input.get_last_step_content().to_xml(),
+            sub_agent_outputs=runtime_task_list.to_xml(),
         )
 
         assembler_out: RunOutput = self.assembler_agent.run(assembler_input_prompt)

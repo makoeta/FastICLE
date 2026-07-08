@@ -1,7 +1,11 @@
+from unittest.mock import MagicMock
+
 from agno.agent import Agent
+from agno.workflow import StepInput
 
 from icle.assembler.core import ASSEMBLER_INPUT_PROMPT, Assembler, AssemblerAgent
 from icle.assembler.prompts import ASSEMBLER_AGENT_PROMPT
+from icle.models.tasks import RuntimeTask, RuntimeTaskList
 
 
 class TestAssemblerInstantiation:
@@ -57,3 +61,36 @@ class TestAssemblerInputPrompt:
         )
         assert "<user_input>" in formatted
         assert "<sub_agent_outputs>" in formatted
+
+
+class TestAssemblerSingleTaskShortCircuit:
+    def _single_task_step_input(self, output: str) -> StepInput:
+        task = RuntimeTask(
+            task_id="T1",
+            description="Write a haiku about autumn",
+            agent_ids=["general_poem_writer"],
+            task_output=output,
+        )
+        step_input = MagicMock(spec=StepInput)
+        step_input.get_last_step_content.return_value = RuntimeTaskList(task_list=[task])
+        return step_input
+
+    def test_single_task_returns_output_verbatim(self, mock_model):
+        assembler = Assembler(model=mock_model)
+        assembler.assembler_agent = MagicMock(spec=AssemblerAgent)
+
+        output = "Crisp leaves drift and fall\n..."
+        step_input = self._single_task_step_input(output)
+
+        result = assembler.assemble(step_input, run_context=MagicMock())
+
+        assert result.content == output
+
+    def test_single_task_skips_synthesis_llm_call(self, mock_model):
+        assembler = Assembler(model=mock_model)
+        assembler.assembler_agent = MagicMock(spec=AssemblerAgent)
+
+        step_input = self._single_task_step_input("some output")
+        assembler.assemble(step_input, run_context=MagicMock())
+
+        assembler.assembler_agent.run.assert_not_called()

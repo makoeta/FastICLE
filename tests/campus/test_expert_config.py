@@ -105,8 +105,35 @@ class TestToAgent:
         agent = config.to_agent()
         assert agent.name == config.name
 
-    def test_agent_system_message_is_description(self):
+    def test_agent_system_message_includes_description(self):
         config = ExpertConfig.from_yaml(GENERAL_POEM_WRITER)
+        agent = config.to_agent()
+        assert config.description in agent.system_message
+
+    def test_agent_system_message_injects_strategy(self):
+        config = ExpertConfig.from_yaml(GENERAL_POEM_WRITER)
+        agent = config.to_agent()
+        assert config.strategy in agent.system_message
+
+    def test_agent_system_message_injects_task_description(self):
+        config = ExpertConfig.from_yaml(GENERAL_POEM_WRITER)
+        agent = config.to_agent()
+        assert config.task_description in agent.system_message
+
+    def test_agent_system_message_injects_buffer_outputs(self):
+        config = ExpertConfig.from_yaml(GENERAL_POEM_WRITER)
+        agent = config.to_agent()
+        assert config.buffer  # fixture sanity check
+        for attempt in config.buffer:
+            assert attempt.task in agent.system_message
+            assert attempt.output in agent.system_message
+            assert str(attempt.reward) in agent.system_message
+
+    def test_agent_system_message_omits_empty_sections(self):
+        config = ExpertConfig.from_yaml(GENERAL_POEM_WRITER)
+        config.strategy = ""
+        config.buffer = []
+        config.task_description = ""
         agent = config.to_agent()
         assert agent.system_message == config.description
 

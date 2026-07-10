@@ -1,14 +1,14 @@
+import copy
 import logging
+import os
 from functools import wraps
-from typing import Annotated
 
 from agno.agent import Agent
 from agno.models.base import Model
-from agno.run.agent import RunOutput
 from pydantic import Field
 
 from icle.campus.core import Campus
-from icle.caster.prompts import build_casting_prompt
+from icle.caster.prompts import build_casting_prompt, build_training_prompt
 
 from icle.models.tasks import CasterTaskList
 
@@ -34,39 +34,95 @@ class CasterAgent(Agent):
         super().__init__()
 
         self.model = model
+        # Phase-2 (assignment) is schema-constrained and carries NO tools:
+        # strict structured output and native tool-calling cannot coexist in a
+        # single model call, so training is done separately in phase-1.
         self.output_schema = CasterTaskList
         self.campus = campus
         self.global_task = global_task
         self.multi_expert_mode = multi_expert_mode
 
+    def _expert_repr(self) -> str:
+        experts = self.campus.get_experts()
+        return "\n".join(
+            f"<expert>\n\t<id>{e.name}</id>\n\t<description>{e.description}</description>\n</expert>"
+            for e in experts
+        )
+
+    def _train_missing_experts(self, task_context: str) -> None:
+        """Phase 1: a tool-enabled agent (no output_schema) that trains any
+        experts the tasks require but the campus doesn't have yet. Tool calls
+        actually execute here, unlike in the schema-constrained assignment
+        pass where the model can only emit the CasterTaskList JSON."""
+
         def train_new_expert(
             expert_task: str, expert_name: str, short_description: str
-        ) -> None:
-            logger.info("Requesting new expert: %s", expert_name)
+        ) -> str:
+            LOGGER.info(f"Requesting new expert: {expert_name}")
             self.campus.train_new_expert(
                 expert_name=expert_name,
                 expert_task=expert_task,
                 description=short_description,
             )
+            return f"Trained expert '{expert_name}'."
 
-        self.tools.append(train_new_expert)
+        trainer = Agent(
+            model=copy.deepcopy(self.model),
+            system_message=build_training_prompt(
+                global_task=self.global_task,
+                available_experts=self._expert_repr(),
+                multi_expert_mode=self.multi_expert_mode,
+            ),
+            tools=[train_new_expert],
+        )
+        trainer.run(input=task_context)
+
+    def _ensure_assigned_experts_exist(self, task_list: CasterTaskList) -> None:
+        """Safety net: if the assignment pass names an expert that was never
+        trained, train it on demand so the Runtime never fails to load its
+        config. Keeps a full benchmark run from aborting on a single stray id."""
+        save_dir = self.campus.expert_save_dir
+        trained: set[str] = set()
+
+        for task in task_list.task_list:
+            for agent_id in task.agent_ids:
+                if agent_id in trained:
+                    continue
+                path = os.path.join(save_dir, agent_id + ".yaml")
+                if not os.path.exists(path):
+                    LOGGER.warning(
+                        f"Assigned expert '{agent_id}' was not trained; "
+                        f"training it now as a fallback."
+                    )
+                    self.campus.train_new_expert(
+                        expert_name=agent_id,
+                        expert_task=task.description,
+                        description=f"Fallback expert for: {task.description[:120]}",
+                    )
+                trained.add(agent_id)
 
     def update_system_message(self):
-        experts = self.campus.get_experts()
-
-        expert_repr = "\n".join(
-            f"<expert>\n\t<id>{e.name}</id>\n\t<description>{e.description}</description>\n</expert>"
-            for e in experts
-        )
-
         self.system_message = build_casting_prompt(
             global_task=self.global_task,
-            available_experts=expert_repr,
+            available_experts=self._expert_repr(),
             multi_expert_mode=self.multi_expert_mode,
         )
 
     @wraps(Agent.run)
     def run(self, *args, **kwargs):
-        self.update_system_message()
+        task_context = kwargs.get("input")
+        if task_context is None and args:
+            task_context = args[0]
 
-        return super().run(*args, **kwargs)
+        # Phase 1: ensure every needed expert exists (tool calls execute).
+        self._train_missing_experts(str(task_context))
+
+        # Phase 2: assign experts from the now-updated pool (schema output).
+        self.update_system_message()
+        output = super().run(*args, **kwargs)
+
+        # Backstop against the model naming an untrained expert.
+        if isinstance(output.content, CasterTaskList):
+            self._ensure_assigned_experts_exist(output.content)
+
+        return output

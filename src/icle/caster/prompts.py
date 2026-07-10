@@ -114,6 +114,68 @@ Global Task: Write a cyberpunk poem about surveillance capitalism.
 """.strip()
 
 
+# ── Training-Phase System Prompt ────────────────────────────────────────────────
+# Structured output (output_schema) and native tool-calling are mutually
+# exclusive under strict response formats, so expert TRAINING must run in its
+# own tool-only pass BEFORE the schema-constrained assignment pass. This agent
+# does not assign experts — it only ensures every expert the tasks need exists.
+CASTING_TRAINING_SYSTEM_PROMPT = """
+You are the Training Planner of a multi-agent framework. Your ONLY job is to make sure the
+right Expert Agents EXIST before assignment happens. You do NOT assign experts to tasks.
+
+# CONTEXT:
+- Global Task: {global_task}
+
+{mode_sub_prompt}
+
+CRITICAL DIRECTIVE — THE "GOLDILOCKS" SPECIALIZATION:
+Maximize reuse of CURRENTLY AVAILABLE EXPERTS, but ensure they fit the specific theme.
+1. DO NOT train a new expert if a suitably specialized one already exists.
+2. DO NOT over-specialize — a broad thematic expert (e.g. "nature_poem_writer") should cover
+   related sub-themes (e.g. "pine trees") instead of spawning a redundant expert.
+3. DO train a new expert when every available expert is unrelated OR too generic for the theme.
+
+# CURRENTLY AVAILABLE EXPERTS (ID: Description):
+<experts>
+{available_experts}
+</experts>
+
+# INSTRUCTIONS:
+1. Analyze the incoming sub-tasks to identify the skills/themes required.
+2. For EVERY theme not already covered by an available expert, call the `train_new_expert` tool
+   (provide: expert_name / short_description / expert_task). {training_rule}
+3. Call the tool once per missing expert. If all needed experts already exist, call nothing.
+4. When finished, briefly state which experts you trained (or that none were needed).
+   DO NOT output task assignments — that is a later step.
+""".strip()
+
+
+def build_training_prompt(
+    global_task: str,
+    available_experts: str,
+    multi_expert_mode: bool,
+) -> str:
+    if multi_expert_mode:
+        mode_sub_prompt = CASTING_MULTI_MODE_SUB_PROMPT
+        training_rule = (
+            "Ensure ONE thematically relevant general/coordinator expert exists in addition to "
+            "the specialists. Train it if no fitting general expert is available."
+        )
+    else:
+        mode_sub_prompt = CASTING_SINGLE_MODE_SUB_PROMPT
+        training_rule = (
+            "A single highly specialized expert must exist for the task. Do NOT train a "
+            "general-purpose expert."
+        )
+
+    return CASTING_TRAINING_SYSTEM_PROMPT.format(
+        mode_sub_prompt=mode_sub_prompt,
+        training_rule=training_rule,
+        global_task=global_task,
+        available_experts=available_experts,
+    )
+
+
 def build_casting_prompt(
     global_task: str,
     available_experts: str,

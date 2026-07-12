@@ -63,6 +63,53 @@ class TestAssemblerInputPrompt:
         assert "<sub_agent_outputs>" in formatted
 
 
+class TestAssemblerUserInput:
+    """The assembler must receive the workflow's original input via
+    StepInput.input — session_state never carried it."""
+
+    def _multi_task_step_input(self, original_input) -> StepInput:
+        tasks = [
+            RuntimeTask(
+                task_id=f"T{i}",
+                description=f"Task {i}",
+                agent_ids=["general_poem_writer"],
+                task_output=f"Output {i}",
+            )
+            for i in (1, 2)
+        ]
+        step_input = MagicMock(spec=StepInput)
+        step_input.input = original_input
+        step_input.get_last_step_content.return_value = RuntimeTaskList(
+            task_list=tasks
+        )
+        return step_input
+
+    def _assemble_and_capture_prompt(self, mock_model, original_input) -> str:
+        assembler = Assembler(model=mock_model)
+        assembler.assembler_agent = MagicMock(spec=AssemblerAgent)
+        run_output = MagicMock()
+        run_output.content = "final answer"
+        run_output.metrics = None
+        assembler.assembler_agent.run.return_value = run_output
+
+        run_context = MagicMock()
+        run_context.session_state = {}
+
+        assembler.assemble(self._multi_task_step_input(original_input), run_context)
+
+        return assembler.assembler_agent.run.call_args.args[0]
+
+    def test_assemble_injects_workflow_input(self, mock_model):
+        prompt = self._assemble_and_capture_prompt(
+            mock_model, "Cook a vegan dinner."
+        )
+        assert "Cook a vegan dinner." in prompt
+
+    def test_assemble_handles_missing_workflow_input(self, mock_model):
+        prompt = self._assemble_and_capture_prompt(mock_model, None)
+        assert "<user_input>\n\n</user_input>" in prompt
+
+
 class TestAssemblerSingleTaskShortCircuit:
     def _single_task_step_input(self, output: str) -> StepInput:
         task = RuntimeTask(

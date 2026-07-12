@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -103,5 +104,44 @@ class TestGetExperts:
             task_generator_model=mock_model,
         )
         assert campus.get_experts() == []
+
+
+class TestCampusSkipsExistingExperts:
+    """Retraining an existing expert wastes tokens and overwrites its learned
+    state — the Campus must skip training when the (normalized) name exists.
+    LLM callers demonstrably re-request identical names, so this is enforced
+    in code, not in prompts."""
+
+    def test_has_expert_finds_saved_expert(self, campus):
+        assert campus.has_expert("general_poem_writer") is True
+
+    def test_has_expert_misses_unknown_name(self, campus):
+        assert campus.has_expert("nonexistent_expert") is False
+
+    def test_has_expert_finds_in_memory_expert(self, campus):
+        campus.in_memory_experts.append(
+            ExpertConfig(
+                name="memory_only_expert",
+                description="d",
+                task_description="t",
+            )
+        )
+        assert campus.has_expert("memory_only_expert") is True
+
+    def test_existing_expert_is_not_retrained(self, campus):
+        with (
+            patch("icle.campus.core.Agent") as MockAgent,
+            patch("icle.campus.core.ICRLLearner") as MockLearner,
+        ):
+            # "General Poem Writer" normalizes to the existing id.
+            result = campus.train_new_expert(
+                expert_name="General Poem Writer",
+                expert_task="Write poems.",
+                description="d",
+            )
+
+        assert result == "general_poem_writer"
+        MockAgent.assert_not_called()
+        MockLearner.assert_not_called()
 
 

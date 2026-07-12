@@ -20,11 +20,14 @@ def make_task(task_id: str, description: str = "task", depends_on: list[str] | N
 
 def make_step_input(tasks: list[CasterTask]):
     step_input = MagicMock()
+    step_input.input = None
     step_input.get_last_step_content.return_value = CasterTaskList(task_list=tasks)
     return step_input
 
 
-def fake_run_task(task: CasterTask, _prior_context: str = "") -> RuntimeTask:
+def fake_run_task(
+    task: CasterTask, _prior_context: str = "", _original_request: str = ""
+) -> RuntimeTask:
     return RuntimeTask(**task.model_dump(), task_output=f"output_for_{task.description}")
 
 
@@ -39,7 +42,7 @@ def test_independent_tasks_run_concurrently(runtime):
     """Tasks with no shared dependencies must execute in parallel threads."""
     barrier = threading.Barrier(2, timeout=3.0)
 
-    def rendezvous_task(task, _prior_context: str = ""):
+    def rendezvous_task(task, _prior_context: str = "", _original_request: str = ""):
         # Both threads must reach this point before either can proceed —
         # raises BrokenBarrierError if tasks run sequentially.
         barrier.wait()
@@ -59,7 +62,7 @@ def test_dependent_task_waits_for_dependencies(runtime):
     completed_ids: list[str] = []
     lock = threading.Lock()
 
-    def tracking_task(task, _prior_context: str = ""):
+    def tracking_task(task, _prior_context: str = "", _original_request: str = ""):
         time.sleep(0.02)
         with lock:
             completed_ids.append(task.task_id)

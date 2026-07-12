@@ -6,7 +6,18 @@ from agno.workflow import StepInput, StepOutput
 from icle.campus.models.expert_config import ExpertConfig
 from icle.models.tasks import CasterTask, CasterTaskList, RuntimeTask, RuntimeTaskList
 from icle.runtime.core import Runtime
-from icle.runtime.prompts import DEPENDENCY_CONTEXT_PREAMBLE
+from icle.runtime.prompts import (
+    DEPENDENCY_CONTEXT_PREAMBLE,
+    ORIGINAL_REQUEST_PREAMBLE,
+    TASK_EXECUTION_INSTRUCTIONS,
+)
+
+
+def make_step_input(caster_task_list, original_input=None):
+    step_input = MagicMock(spec=StepInput)
+    step_input.input = original_input
+    step_input.get_last_step_content.return_value = caster_task_list
+    return step_input
 
 DUMMY_EXPERTS_DIR = str(Path(__file__).parent.parent / "data" / "dummy_experts")
 
@@ -42,6 +53,27 @@ class TestRuntimeRunTask:
         assert result.agent_ids == ["nature_poem_writer"]
         assert result.task_output == "A beautiful poem about nature."
 
+    def test_team_receives_execution_instructions(self, mock_model):
+        """Teams must be told they run autonomously: no clarifying questions,
+        no meta-commentary — only the finished work product."""
+        runtime = Runtime(model=mock_model, expert_save_dir=DUMMY_EXPERTS_DIR)
+        caster_task = CasterTask(
+            task_id="T1",
+            description="Write a nature poem.",
+            agent_ids=["nature_poem_writer"],
+        )
+
+        with patch("icle.runtime.core.Team") as MockTeam:
+            mock_run_output = MagicMock()
+            mock_run_output.content = "output"
+            MockTeam.return_value.run.return_value = mock_run_output
+
+            runtime._run_task(caster_task)
+
+        assert (
+            MockTeam.call_args.kwargs["instructions"] == TASK_EXECUTION_INSTRUCTIONS
+        )
+
     def test_run_task_loads_expert_from_yaml(self, mock_model):
         runtime = Runtime(model=mock_model, expert_save_dir=DUMMY_EXPERTS_DIR)
         caster_task = CasterTask(
@@ -75,8 +107,7 @@ class TestRuntimeStepExecution:
             ]
         )
 
-        mock_step_input = MagicMock(spec=StepInput)
-        mock_step_input.get_last_step_content.return_value = caster_task_list
+        mock_step_input = make_step_input(caster_task_list)
 
         with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
@@ -97,8 +128,7 @@ class TestRuntimeStepExecution:
             ]
         )
 
-        mock_step_input = MagicMock(spec=StepInput)
-        mock_step_input.get_last_step_content.return_value = caster_task_list
+        mock_step_input = make_step_input(caster_task_list)
 
         with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
@@ -191,8 +221,7 @@ class TestRuntimeDependencyContext:
                 ),
             ]
         )
-        mock_step_input = MagicMock(spec=StepInput)
-        mock_step_input.get_last_step_content.return_value = caster_task_list
+        mock_step_input = make_step_input(caster_task_list)
 
         with patch("icle.runtime.core.Team") as MockTeam:
             mock_run_output = MagicMock()
@@ -206,6 +235,60 @@ class TestRuntimeDependencyContext:
         assert DEPENDENCY_CONTEXT_PREAMBLE in prompts[1]
         assert "The finished menu design." in prompts[1]
         assert prompts[1].endswith("Write the appetizer recipe.")
+
+
+class TestRuntimeOriginalRequest:
+    """Every task prompt must carry the workflow's original request as
+    background, so details a lossy task description dropped are recoverable."""
+
+    def _run_and_capture_prompt(self, runtime, step_input) -> str:
+        with patch("icle.runtime.core.Team") as MockTeam:
+            mock_run_output = MagicMock()
+            mock_run_output.content = "output"
+            MockTeam.return_value.run.return_value = mock_run_output
+
+            runtime.runtime(step_input)
+
+        return MockTeam.return_value.run.call_args.args[0]
+
+    def test_task_prompt_includes_original_request(self, mock_model):
+        runtime = Runtime(model=mock_model, expert_save_dir=DUMMY_EXPERTS_DIR)
+        caster_task_list = CasterTaskList(
+            task_list=[
+                CasterTask(
+                    task_id="T1",
+                    description="Write the appetizer recipe.",
+                    agent_ids=["nature_poem_writer"],
+                )
+            ]
+        )
+        step_input = make_step_input(
+            caster_task_list,
+            original_input="Cook a vegan dinner with full ingredient lists.",
+        )
+
+        prompt = self._run_and_capture_prompt(runtime, step_input)
+
+        assert ORIGINAL_REQUEST_PREAMBLE in prompt
+        assert "Cook a vegan dinner with full ingredient lists." in prompt
+        assert prompt.endswith("Write the appetizer recipe.")
+
+    def test_no_request_block_without_workflow_input(self, mock_model):
+        runtime = Runtime(model=mock_model, expert_save_dir=DUMMY_EXPERTS_DIR)
+        caster_task_list = CasterTaskList(
+            task_list=[
+                CasterTask(
+                    task_id="T1",
+                    description="Write the appetizer recipe.",
+                    agent_ids=["nature_poem_writer"],
+                )
+            ]
+        )
+        step_input = make_step_input(caster_task_list, original_input=None)
+
+        prompt = self._run_and_capture_prompt(runtime, step_input)
+
+        assert prompt == "Write the appetizer recipe."
 
 
 class TestRuntimeExpertPrompt:

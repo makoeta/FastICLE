@@ -85,17 +85,38 @@ class Campus(BaseModel):
 
         return task_list
 
+    def has_expert(self, expert_name: str) -> bool:
+        """True if an expert with this (already normalized) name exists on
+        disk or in memory."""
+        if any(e.name == expert_name for e in self.in_memory_experts):
+            return True
+        return (Path(self.expert_save_dir) / f"{expert_name}.yaml").is_file()
+
     def train_new_expert(
         self, expert_name: str, expert_task: str, description: str
-    ) -> None:
+    ) -> str:
         """Use this method to train a new expert for the campus.
 
         Args:
             expert_name (str): Name of the expert. Used later for task allocation
             expert_task (str): Task the expert is the specialist for.
+
+        Returns:
+            The normalized expert name (the assignable ID).
         """
 
         expert_name = expert_name.replace(" ", "_").lower()
+
+        # Retraining an existing expert wastes tokens and silently overwrites
+        # its learned state — reuse it instead. LLM callers cannot be trusted
+        # to check the pool reliably, so this guard is enforced in code.
+        if self.has_expert(expert_name):
+            logger.info(
+                "Expert '%s' already exists — skipping training, reusing it.",
+                expert_name,
+            )
+            return expert_name
+
         logger.info("Training new expert: %s", expert_name)
         task_list: TrainingTaskList = self.__generate_synth_learning_tasks(expert_task)
 
@@ -134,3 +155,5 @@ class Campus(BaseModel):
                 "Auto-save disabled, expert '%s' is kept in memory only",
                 expert_name,
             )
+
+        return expert_name

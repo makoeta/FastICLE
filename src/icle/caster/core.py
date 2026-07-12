@@ -5,7 +5,6 @@ from functools import wraps
 
 from agno.agent import Agent
 from agno.models.base import Model
-from pydantic import Field
 
 from icle.campus.core import Campus
 from icle.caster.prompts import build_casting_prompt, build_training_prompt
@@ -58,7 +57,7 @@ class CasterAgent(Agent):
         def train_new_expert(
             expert_task: str, expert_name: str, short_description: str
         ) -> str:
-            LOGGER.info(f"Requesting new expert: {expert_name}")
+            logger.info(f"Requesting new expert: {expert_name}")
             self.campus.train_new_expert(
                 expert_name=expert_name,
                 expert_task=expert_task,
@@ -90,7 +89,7 @@ class CasterAgent(Agent):
                     continue
                 path = os.path.join(save_dir, agent_id + ".yaml")
                 if not os.path.exists(path):
-                    LOGGER.warning(
+                    logger.warning(
                         f"Assigned expert '{agent_id}' was not trained; "
                         f"training it now as a fallback."
                     )
@@ -113,6 +112,7 @@ class CasterAgent(Agent):
         task_context = kwargs.get("input")
         if task_context is None and args:
             task_context = args[0]
+        logger.debug("Caster input:\n%s", task_context)
 
         # Phase 1: ensure every needed expert exists (tool calls execute).
         self._train_missing_experts(str(task_context))
@@ -124,5 +124,7 @@ class CasterAgent(Agent):
         # Backstop against the model naming an untrained expert.
         if isinstance(output.content, CasterTaskList):
             self._ensure_assigned_experts_exist(output.content)
+            for task in output.content.task_list:
+                logger.info("Cast [%s] -> experts %s", task.task_id, task.agent_ids)
 
         return output

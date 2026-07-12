@@ -2,7 +2,6 @@ from agno.run import RunContext
 from agno.run.agent import RunOutput
 from agno.workflow import StepOutput
 from agno.workflow import StepInput
-from pydantic import BaseModel
 from agno.models.base import Model
 from icle.assembler.prompts import ASSEMBLER_AGENT_PROMPT
 from icle.models.tasks import RuntimeTaskList
@@ -39,7 +38,7 @@ class Assembler:
         self.assembler_agent = AssemblerAgent(model=model)
 
     def assemble(self, step_input: StepInput, run_context: RunContext) -> StepOutput:
-        LOGGER.info("Starting assembling...")
+        logger.info("Starting assembling...")
 
         runtime_task_list: RuntimeTaskList = step_input.get_last_step_content()
 
@@ -47,7 +46,7 @@ class Assembler:
         # sole task's output verbatim instead of paying an extra LLM call that
         # would, at best, paraphrase an already-complete answer.
         if len(runtime_task_list.task_list) == 1:
-            LOGGER.info("Single task detected — skipping synthesis, returning output directly.")
+            logger.info("Single task detected — skipping synthesis, returning output directly.")
             return StepOutput(content=runtime_task_list.task_list[0].task_output)
 
         user_input = run_context.session_state.get("user_input", "")
@@ -56,6 +55,8 @@ class Assembler:
             user_input=user_input,
             sub_agent_outputs=runtime_task_list.to_xml(),
         )
+
+        logger.debug("Assembler input:\n%s", assembler_input_prompt)
 
         assembler_out: RunOutput = self.assembler_agent.run(assembler_input_prompt)
 
@@ -67,4 +68,5 @@ class Assembler:
             usage["output_tokens"] += assembler_out.metrics.output_tokens or 0
 
         logger.info("Assembling finished.")
+        logger.debug("Assembled output:\n%s", assembler_out.content)
         return StepOutput(content=assembler_out.content)

@@ -1,10 +1,12 @@
 import logging
+from collections.abc import Iterator
 
 # Attached before the submodule imports below so that no record emitted
 # during import can reach Python's last-resort stderr handler.
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 from icle.assembler.core import Assembler
+from icle.log_setup import enable_verbose_logging
 from icle.runtime.core import Runtime
 from icle.campus.core import Campus
 from agno.models.base import Model
@@ -26,9 +28,14 @@ class ICLE(Workflow):
         global_task: str,
         expert_save_dir: str,
         multi_expert_mode=False,
+        verbose: bool = False,
+        log_file: str | None = "icle.log",
         **kwargs,
     ):
         super().__init__(**kwargs)
+
+        if verbose:
+            enable_verbose_logging(log_file)
 
         self.campus = Campus(
             global_task=global_task,

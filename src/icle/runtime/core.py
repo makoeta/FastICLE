@@ -77,6 +77,17 @@ class Runtime(BaseModel):
 
             for task, future in futures:
                 runtime_task: RuntimeTask = future.result()
+                logger.info(
+                    "Task [%s] finished (%d chars, experts %s)",
+                    runtime_task.task_id,
+                    len(runtime_task.task_output),
+                    runtime_task.agent_ids,
+                )
+                logger.debug(
+                    "Task [%s] output:\n%s",
+                    runtime_task.task_id,
+                    runtime_task.task_output,
+                )
                 runtime_task_list.task_list.append(runtime_task)
                 prior_xml_by_id[runtime_task.task_id] = runtime_task.to_xml()
 
@@ -112,6 +123,8 @@ class Runtime(BaseModel):
             if prior_context
             else caster_task.description
         )
+
+        logger.debug("Task [%s] prompt:\n%s", caster_task.task_id, prompt)
 
         expert_out: RunOutput = team.run(prompt)
 

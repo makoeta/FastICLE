@@ -5,7 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+*.ipynb
 tests/data/**
 tests/data/dummy_experts/**
 
@@ -100,6 +100,8 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+# Experts trained by the verbose_mode_test notebook
+notebook_experts/
 
 # IPython
 profile_default/

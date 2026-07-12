@@ -48,22 +48,28 @@ class CasterAgent(Agent):
             for e in experts
         )
 
-    def _train_missing_experts(self, task_context: str) -> None:
+    def _train_missing_experts(self, task_context: str) -> list[str]:
         """Phase 1: a tool-enabled agent (no output_schema) that trains any
         experts the tasks require but the campus doesn't have yet. Tool calls
         actually execute here, unlike in the schema-constrained assignment
-        pass where the model can only emit the CasterTaskList JSON."""
+        pass where the model can only emit the CasterTaskList JSON.
+
+        Returns the normalized names of the experts prepared for this request
+        (freshly trained or confirmed to already exist)."""
+
+        prepared: list[str] = []
 
         def train_new_expert(
             expert_task: str, expert_name: str, short_description: str
         ) -> str:
             logger.info(f"Requesting new expert: {expert_name}")
-            self.campus.train_new_expert(
+            name = self.campus.train_new_expert(
                 expert_name=expert_name,
                 expert_task=expert_task,
                 description=short_description,
             )
-            return f"Trained expert '{expert_name}'."
+            prepared.append(name)
+            return f"Expert '{name}' is available."
 
         trainer = Agent(
             model=copy.deepcopy(self.model),
@@ -75,6 +81,8 @@ class CasterAgent(Agent):
             tools=[train_new_expert],
         )
         trainer.run(input=task_context)
+
+        return prepared
 
     def _ensure_assigned_experts_exist(self, task_list: CasterTaskList) -> None:
         """Safety net: if the assignment pass names an expert that was never
@@ -100,12 +108,21 @@ class CasterAgent(Agent):
                     )
                 trained.add(agent_id)
 
-    def update_system_message(self):
+    def update_system_message(self, recently_prepared: list[str] | None = None):
         self.system_message = build_casting_prompt(
             global_task=self.global_task,
             available_experts=self._expert_repr(),
             multi_expert_mode=self.multi_expert_mode,
         )
+
+        if recently_prepared:
+            self.system_message += (
+                "\n\n# EXPERTS PREPARED FOR THIS REQUEST:\n"
+                "The following experts were just trained (or confirmed available) "
+                "specifically for the current tasks. Assign THESE unless a listed "
+                "expert is clearly a better fit — do not pick similar-sounding "
+                "alternatives over them: " + ", ".join(recently_prepared)
+            )
 
     @wraps(Agent.run)
     def run(self, *args, **kwargs):
@@ -115,10 +132,10 @@ class CasterAgent(Agent):
         logger.debug("Caster input:\n%s", task_context)
 
         # Phase 1: ensure every needed expert exists (tool calls execute).
-        self._train_missing_experts(str(task_context))
+        prepared = self._train_missing_experts(str(task_context))
 
         # Phase 2: assign experts from the now-updated pool (schema output).
-        self.update_system_message()
+        self.update_system_message(recently_prepared=prepared)
         output = super().run(*args, **kwargs)
 
         # Backstop against the model naming an untrained expert.

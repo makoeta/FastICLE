@@ -49,7 +49,8 @@ class Assembler:
             logger.info("Single task detected — skipping synthesis, returning output directly.")
             return StepOutput(content=runtime_task_list.task_list[0].task_output)
 
-        user_input = run_context.session_state.get("user_input", "")
+        # StepInput.input carries the workflow's original input into every step.
+        user_input = str(step_input.input) if step_input.input else ""
 
         assembler_input_prompt: str = ASSEMBLER_INPUT_PROMPT.format(
             user_input=user_input,

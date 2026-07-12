@@ -134,6 +134,10 @@ Maximize reuse of CURRENTLY AVAILABLE EXPERTS, but ensure they fit the specific 
 2. DO NOT over-specialize — a broad thematic expert (e.g. "nature_poem_writer") should cover
    related sub-themes (e.g. "pine trees") instead of spawning a redundant expert.
 3. DO train a new expert when every available expert is unrelated OR too generic for the theme.
+4. NEVER train a rebranded variant of an existing expert. Before EVERY tool call, scan the
+   <experts> list: if an expert with the same or a nearly identical name or purpose exists
+   (e.g. "vegan_main_course_specialist" when "vegan_main_course_chef" is listed), reuse the
+   existing one instead of training.
 
 # CURRENTLY AVAILABLE EXPERTS (ID: Description):
 <experts>

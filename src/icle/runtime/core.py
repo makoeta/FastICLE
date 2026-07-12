@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from icle.campus.models.expert_config import ExpertConfig
 from icle.models.tasks import CasterTask, CasterTaskList, RuntimeTask, RuntimeTaskList
+from icle.runtime.prompts import DEPENDENCY_CONTEXT_PREAMBLE
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ class Runtime(BaseModel):
 
         caster_task_list: CasterTaskList = step_input.get_last_step_content()
 
-        prior_xml_by_id: dict[str, str] = {}
+        prior_tasks_by_id: dict[str, RuntimeTask] = {}
         for batch in self._build_batches(caster_task_list.task_list):
             logger.info(
                 "Running %d task(s) in parallel: %s",
@@ -69,7 +70,7 @@ class Runtime(BaseModel):
                         pool.submit(
                             self._run_task,
                             task,
-                            self._build_prior_context(task, prior_xml_by_id),
+                            self._build_prior_context(task, prior_tasks_by_id),
                         ),
                     )
                     for task in batch
@@ -89,17 +90,26 @@ class Runtime(BaseModel):
                     runtime_task.task_output,
                 )
                 runtime_task_list.task_list.append(runtime_task)
-                prior_xml_by_id[runtime_task.task_id] = runtime_task.to_xml()
+                prior_tasks_by_id[runtime_task.task_id] = runtime_task
 
         return StepOutput(content=runtime_task_list)
 
     def _build_prior_context(
-        self, task: CasterTask, prior_xml_by_id: dict[str, str]
+        self, task: CasterTask, prior_tasks_by_id: dict[str, RuntimeTask]
     ) -> str:
-        dep_xmls = [prior_xml_by_id[dep] for dep in task.depends_on if dep in prior_xml_by_id]
-        if not dep_xmls:
+        deps = [
+            prior_tasks_by_id[dep]
+            for dep in task.depends_on
+            if dep in prior_tasks_by_id
+        ]
+        if not deps:
             return ""
-        return f"<tasks>\n" + "\n".join(dep_xmls) + "\n</tasks>"
+
+        dep_xmls = "\n".join(dep.to_context_xml() for dep in deps)
+        return (
+            f"{DEPENDENCY_CONTEXT_PREAMBLE}\n"
+            f"<dependency_outputs>\n{dep_xmls}\n</dependency_outputs>"
+        )
 
     def _run_task(self, caster_task: CasterTask, prior_context: str = ""):
         if not caster_task.agent_ids:

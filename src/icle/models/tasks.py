@@ -48,6 +48,18 @@ class CasterTask(DispatcherTask):
 class RuntimeTask(CasterTask):
     task_output: Annotated[str, Field()]
 
+    def to_context_xml(self) -> str:
+        """XML for injecting this task's result into a dependent task's
+        prompt — only what the downstream task needs, without the
+        agent/dependency bookkeeping that to_xml() carries."""
+        return (
+            "<task>\n"
+            f"\t<task_id>{escape(self.task_id)}</task_id>\n"
+            f"\t<description>{escape(self.description)}</description>\n"
+            f"\t<task_output>{escape(self.task_output)}</task_output>\n"
+            "</task>"
+        )
+
 
 class DispatcherTaskList(BaseModel):
     task_list: list[DispatcherTask]

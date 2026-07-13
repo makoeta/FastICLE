@@ -67,6 +67,9 @@ class Campus(BaseModel):
             output_schema=TrainingTaskList,
             system_message=CAMPUS_AGENT_SYSTEM_PROMPT,
         )
+        logger.debug(
+            "Campus curriculum system prompt:\n%s", CAMPUS_AGENT_SYSTEM_PROMPT
+        )
 
         run_output: RunOutput = task_agent.run(f"""Global task: {self.global_task}
 

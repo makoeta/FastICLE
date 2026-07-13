@@ -57,6 +57,9 @@ class Assembler:
             sub_agent_outputs=runtime_task_list.to_xml(),
         )
 
+        logger.debug(
+            "Assembler system prompt:\n%s", self.assembler_agent.system_message
+        )
         logger.debug("Assembler input:\n%s", assembler_input_prompt)
 
         assembler_out: RunOutput = self.assembler_agent.run(assembler_input_prompt)

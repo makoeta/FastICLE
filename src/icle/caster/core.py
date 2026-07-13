@@ -80,6 +80,9 @@ class CasterAgent(Agent):
             ),
             tools=[train_new_expert],
         )
+        logger.debug(
+            "Caster training-pass system prompt:\n%s", trainer.system_message
+        )
         trainer.run(input=task_context)
 
         return prepared
@@ -136,6 +139,7 @@ class CasterAgent(Agent):
 
         # Phase 2: assign experts from the now-updated pool (schema output).
         self.update_system_message(recently_prepared=prepared)
+        logger.debug("Caster system prompt:\n%s", self.system_message)
         output = super().run(*args, **kwargs)
 
         # Backstop against the model naming an untrained expert.

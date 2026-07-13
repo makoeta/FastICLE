@@ -30,6 +30,7 @@ class DispatcherAgent(Agent):
         if input_prompt is None and args:
             input_prompt = args[0]
         logger.debug("Dispatcher input:\n%s", input_prompt)
+        logger.debug("Dispatcher system prompt:\n%s", self.system_message)
 
         run_output = super().run(*args, **kwargs)
 

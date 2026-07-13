@@ -139,11 +139,22 @@ class Runtime(BaseModel):
                 path + "/" + agent_id + ".yaml"
             ).to_agent()
             experts.append(expert)
+            logger.debug(
+                "Task [%s] expert '%s' system prompt:\n%s",
+                caster_task.task_id,
+                expert.name,
+                expert.system_message,
+            )
 
         team: Team = Team(
             members=experts,
             model=copy.deepcopy(self.model),
             instructions=TASK_EXECUTION_INSTRUCTIONS,
+        )
+        logger.debug(
+            "Task [%s] team instructions:\n%s",
+            caster_task.task_id,
+            TASK_EXECUTION_INSTRUCTIONS,
         )
 
         sections: list[str] = []

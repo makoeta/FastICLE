@@ -130,12 +130,16 @@ class TestToAgent:
             assert str(attempt.reward) in agent.system_message
 
     def test_agent_system_message_omits_empty_sections(self):
+        """Section handling is owned by FastICRL's eval rendering: empty
+        strategy/buffer/task_description must not leave empty sections."""
         config = ExpertConfig.from_yaml(GENERAL_POEM_WRITER)
         config.strategy = ""
         config.buffer = []
         config.task_description = ""
         agent = config.to_agent()
-        assert agent.system_message == config.description
+        assert agent.system_message.startswith(config.description)
+        assert "# Learned Strategy" not in agent.system_message
+        assert "# Past Attempts" not in agent.system_message
 
     def test_each_expert_produces_distinct_agent_name(self):
         general = ExpertConfig.from_yaml(GENERAL_POEM_WRITER).to_agent()

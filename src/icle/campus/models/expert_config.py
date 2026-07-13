@@ -32,38 +32,15 @@ class ExpertConfig(AgentSaveState):
         return path
 
     def to_agent(self) -> Agent:
-        return Agent(name=self.name, system_message=self._build_system_message())
-
-    def _build_system_message(self) -> str:
-        """Compose the runtime agent's system message from the persisted
-        training artifacts. The one-line ``description`` is what the Caster uses
-        to *pick* an expert; here — where the expert actually *executes* — we
-        additionally inject the trained ``strategy`` and the experience
-        ``buffer`` so the runtime agent runs with what it learned, not just its
-        summary."""
-        sections: list[str] = [self.description]
-
-        if self.task_description:
-            sections.append(f"# Task\n{self.task_description}")
-
-        if self.strategy:
-            sections.append(f"# Learned Strategy\n{self.strategy}")
-
-        if self.buffer:
-            # Same XML rendering FastICRL uses during training, so the expert
-            # sees its experience buffer in the format its task_description
-            # framing was written for.
-            attempts_xml = "\n".join(
-                "<attempt>\n"
-                f"\tTask: {attempt.task}\n"
-                f"\tOutput: {attempt.output}\n"
-                f"\tReward: {attempt.reward}\n"
-                "</attempt>"
-                for attempt in self.buffer
-            )
-            sections.append(f"# Past Attempts (Experience Buffer)\n{attempts_xml}")
-
-        return "\n\n".join(sections)
+        """The runtime agent runs on FastICRL's eval rendering (inherited via
+        AgentSaveState): identity framing, frozen-policy instructions, learned
+        strategy, and the experience buffer in the same XML format used during
+        training. The one-line ``description`` the Caster picks experts by is
+        prepended."""
+        return Agent(
+            name=self.name,
+            system_message=f"{self.description}\n\n{self.eval_system_message()}",
+        )
 
     @classmethod
     def from_yaml(cls, path: str | Path):

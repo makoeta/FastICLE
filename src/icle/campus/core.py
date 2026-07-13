@@ -14,7 +14,7 @@ from icle.campus.models.expert_config import ExpertConfig
 from icle.campus.models.training_task_list import TrainingTaskList
 from icle.campus.prompts import (
     CAMPUS_AGENT_SYSTEM_PROMPT,
-    ICRL_AGENT_SYSTEM_PROMPT,
+    EXPERT_TASK_DESCRIPTION_PROMPT,
 )
 
 logger = logging.getLogger(__name__)
@@ -127,7 +127,7 @@ class Campus(BaseModel):
             learner_model=self.learner_model,
             reward_model=self.reward_model,
             strategy_model=self.strategy_model,
-            task_description=ICRL_AGENT_SYSTEM_PROMPT.format(
+            task_description=EXPERT_TASK_DESCRIPTION_PROMPT.format(
                 global_task=self.global_task, expert_task=expert_task
             ),
             tasks=task_list.task_prompts,

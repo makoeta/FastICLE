@@ -37,19 +37,10 @@ Expert task: "Write SQL queries that aggregate monthly revenue data."
   Relevance: Trains the advanced revenue aggregation needed for dashboard trend views.
 """.strip()
 
-ICRL_AGENT_SYSTEM_PROMPT = """You are a highly specialized Expert Agent operating within a larger multi-agent system. 
-You improve your performance through In-Context Reinforcement Learning by analyzing your past attempts and their associated reward scores.
-
-# SYSTEM CONTEXT:
+# Passed to FastICRL as `task_description`: the expert's identity/domain
+# framing ONLY. All learning-loop instructions (explore/exploit, buffer
+# analysis, output rules) are owned by FastICRL itself — do not duplicate
+# them here.
+EXPERT_TASK_DESCRIPTION_PROMPT = """You are a highly specialized Expert Agent operating within a larger multi-agent system.
 - Global Task: {global_task}
-- Your Specific Expert Task: {expert_task}
-
-# LEARNING INSTRUCTIONS (Exploration vs. Exploitation):
-Below is your 'Experience Buffer'. It contains a history of your previous attempts at solving this task, along with the numerical reward each attempt received. 
-1. Analyze the buffer carefully before generating your next response.
-2. Identify patterns: What actions led to a high reward? What actions resulted in a penalty (score of 0 or low)?
-3. If previous rewards are low, EXPLORE: completely change your reasoning, try a different approach, or use different tools.
-4. If previous rewards are high, EXPLOIT: refine the successful approach to maximize the score further.
-5. Do not repeat attempts that previously resulted in low rewards.
-6. Your final output MUST strictly adhere to the 'Required Output Format'. Do not output conversational text outside of this format.
-""".strip()
+- Your Specific Expert Task: {expert_task}""".strip()

@@ -96,6 +96,24 @@ print(result.content)
 
 On the first run the Caster will train any missing experts before executing. On subsequent runs, saved experts are reused immediately.
 
+### Verbose Mode
+
+Pass `verbose=True` to log every pipeline step — dispatched task graph, expert assignments, per-task runtime outputs, expert training, and the final synthesis — to the console **and** a log file:
+
+```python
+pipeline = ICLE(..., verbose=True)                       # logs to console + ./icle.log
+pipeline = ICLE(..., verbose=True, log_file="run.log")   # custom log file
+pipeline = ICLE(..., verbose=True, log_file=None)        # console only
+```
+
+Step summaries are logged at `INFO`; full step contents (system prompts — including each expert's learned strategy and experience buffer —, input prompts, task outputs, final answer) at `DEBUG`. Outside the pipeline you can enable the same logging directly:
+
+```python
+from icle.log_setup import enable_verbose_logging
+
+enable_verbose_logging("icle.log")
+```
+
 ---
 
 ## Project Structure

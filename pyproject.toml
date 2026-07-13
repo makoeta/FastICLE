@@ -19,7 +19,7 @@ classifiers = [
 dependencies = [
     "agno>=2.6.9",
     "fastapi>=0.136.3",
-    "fasticrl>=1.0.0",
+    "fasticrl==1.1.1",
     "python-dotenv>=1.2.2",
 ]
 

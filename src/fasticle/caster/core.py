@@ -63,7 +63,7 @@ class CasterAgent(Agent):
             expert_task: str,
             expert_name: str,
             short_description: str,
-            closest_existing_expert: str,
+            closest_existing_expert: str | None,
         ) -> str:
             """Train a new expert. Before calling, check the available experts.
 
@@ -76,6 +76,7 @@ class CasterAgent(Agent):
                     Naming an expert means it will be REUSED — no training
                     happens. Training requires an explicit "none".
             """
+            closest_existing_expert = closest_existing_expert or "none"
             logger.info(
                 "Requesting new expert: %s (closest existing: %s)",
                 expert_name,

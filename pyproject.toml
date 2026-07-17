@@ -1,12 +1,12 @@
 [project]
 name = "FastICLE"
-version = "1.0.3"
+version = "1.0.0"
 description = "Multi-agent framework that trains and orchestrates specialized Expert Agents on-demand via In-Context Reinforcement Learning."
 readme = "README.md"
 requires-python = ">=3.13"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Maximilian König", email = "makoeta@gmx.de" },
+    { name = "Maximilian König", email = "47715517+makoeta@users.noreply.github.com" },
 ]
 keywords = ["llm", "agents", "multi-agent", "in-context-learning", "reinforcement-learning", "mixture-of-experts"]
 classifiers = [

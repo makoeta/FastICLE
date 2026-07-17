@@ -62,7 +62,7 @@ class Campus(BaseModel):
         return list(experts_by_name.values())
 
     def __generate_synth_learning_tasks(self, expert_task):
-        task_agent = Agent(
+        campus_director = Agent(
             model=self.task_generator_model,
             output_schema=TrainingTaskList,
             system_message=CAMPUS_AGENT_SYSTEM_PROMPT,
@@ -71,7 +71,7 @@ class Campus(BaseModel):
             "Campus curriculum system prompt:\n%s", CAMPUS_AGENT_SYSTEM_PROMPT
         )
 
-        run_output: RunOutput = task_agent.run(f"""Global task: {self.global_task}
+        run_output: RunOutput = campus_director.run(f"""Global task: {self.global_task}
 
                     Expert task: {expert_task}""")
 

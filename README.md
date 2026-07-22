@@ -1,9 +1,11 @@
 # FastICLE
 
-[![PyPI version](https://img.shields.io/pypi/v/fasticle)](https://pypi.org/project/fasticle/)
-[![Python](https://img.shields.io/pypi/pyversions/fasticle)](https://pypi.org/project/fasticle/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
-[![Powered by agno](https://img.shields.io/badge/powered%20by-agno-8A2BE2)](https://github.com/agno-agi/agno)
+<p align="center">
+  <a href="https://pypi.org/project/fasticle/"><img src="https://img.shields.io/pypi/v/fasticle" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/fasticle/"><img src="https://img.shields.io/pypi/pyversions/fasticle" alt="Python"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://github.com/agno-agi/agno"><img src="https://img.shields.io/badge/powered%20by-agno-8A2BE2" alt="Powered by agno"></a>
+</p>
 
 **Multi-agent framework with on-demand trained Expert Agents — no fine-tuning, no gradient updates.**
 

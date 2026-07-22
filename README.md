@@ -1,6 +1,13 @@
 # FastICLE
 
-**FastICLE** is a multi-agent AI framework implementing the **ICLE (In-Context Learning Experts)** paradigm: it dynamically trains and orchestrates specialized *Expert Agents* to solve complex, multi-step tasks. Experts are trained on-demand using **In-Context Reinforcement Learning (ICRL)** and persist across runs, accumulating refined strategies over time.
+[![PyPI version](https://img.shields.io/pypi/v/fasticle)](https://pypi.org/project/fasticle/)
+[![Python](https://img.shields.io/pypi/pyversions/fasticle)](https://pypi.org/project/fasticle/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
+[![Powered by agno](https://img.shields.io/badge/powered%20by-agno-8A2BE2)](https://github.com/agno-agi/agno)
+
+**Multi-agent framework with on-demand trained Expert Agents — no fine-tuning, no gradient updates.**
+
+**FastICLE** implements the **ICLE (In-Context Learning Experts)** paradigm: it dynamically trains and orchestrates specialized *Expert Agents* to solve complex, multi-step tasks. Experts are trained on-demand using **In-Context Reinforcement Learning (ICRL)** and persist across runs, accumulating refined strategies over time.
 
 ---
 

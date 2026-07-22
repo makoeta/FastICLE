@@ -2,8 +2,6 @@
 
 **FastICLE** is a multi-agent AI framework implementing the **ICLE (In-Context Learning Experts)** paradigm: it dynamically trains and orchestrates specialized *Expert Agents* to solve complex, multi-step tasks. Experts are trained on-demand using **In-Context Reinforcement Learning (ICRL)** and persist across runs, accumulating refined strategies over time.
 
-![Framework Architecture](./assets/framework_architecture.png)
-
 ---
 
 ## How It Works
